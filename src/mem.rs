@@ -729,6 +729,23 @@ impl Mem {
         self.vm_allocator.allocate(Some(base), size).unwrap();
     }
 
+    /// Returns a snapshot of all currently-live heap allocations as
+    /// `(base_address, size_in_bytes)` pairs.
+    pub fn live_allocations(&self) -> Vec<(GuestUSize, GuestUSize)> {
+        self.heap_allocator
+            .as_ref()
+            .map(|heap| heap.live_allocations())
+            .unwrap_or_default()
+    }
+
+    pub fn corrupt_byte(&mut self, addr: GuestUSize, value: u8) -> u8 {
+        let ptr: MutPtr<u8> = Ptr::from_bits(addr);
+        let slice = self.bytes_at_mut(ptr, 1);
+        let old = slice[0];
+        slice[0] = value;
+        old
+    }
+
     /// Returns a mutable references to the vm allocator and either the
     /// provided heap or the default heap if no heap is provided.
     fn allocators_mut<'a>(

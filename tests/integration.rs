@@ -197,6 +197,8 @@ fn run_test_app(
         // testing, and works in CI.
         .arg("--headless")
         .args(extra_run_args)
+        // Keep the deterministic integration suite isolated from game corruption.
+        .arg("--no-corrupt-game")
         // Run the automated CLI tests, rather than the manual UIKit tests.
         .arg("--args")
         .arg("--cli-tests")

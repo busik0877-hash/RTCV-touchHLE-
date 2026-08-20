@@ -207,6 +207,12 @@ mod collections {
             self.chunks.get(&base).copied()
         }
 
+        pub fn iter(&self) -> impl Iterator<Item = Chunk> + '_ {
+            self.chunks
+                .iter()
+                .map(|(&base, &size)| Chunk { base, size })
+        }
+
         pub fn overlapping_chunks(&self, chunk: Chunk) -> impl Iterator<Item = Chunk> + '_ {
             let start = self
                 .chunks
@@ -526,6 +532,14 @@ impl HeapAllocator {
     /// virtual memory chunks
     pub fn into_vm_chunks(self) -> impl Iterator<Item = Chunk> {
         self.external_chunks.into_iter().chain(self.backing_chunks)
+    }
+
+    pub fn live_allocations(&self) -> Vec<(VAddr, GuestUSize)> {
+        self.used_chunks
+            .iter()
+            .chain(self.external_chunks.iter())
+            .map(|chunk| (chunk.base, chunk.size.get()))
+            .collect()
     }
 
     fn grow(&mut self, vm: &mut VMAllocator) {
