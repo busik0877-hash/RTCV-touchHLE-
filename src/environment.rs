@@ -126,6 +126,9 @@ pub struct Environment {
     // Sadly, setting ticks to 1 does not step properly, so Option is required.
     remaining_ticks: Option<u64>,
     panic_cell: Rc<Cell<Option<Environment>>>,
+    /// Optional RTCV-style game-corruption engine. Always present, but only
+    /// does anything when enabled via the `--corrupt*` options.
+    corruptor: crate::corrupt::Corruptor,
 }
 
 /// What to do next when executing this thread.
@@ -663,6 +666,7 @@ impl Environment {
             framework_state: Default::default(),
         };
 
+        let corruption_options = options.corruption.clone();
         let mut env = Environment {
             startup_time,
             bundle: NullableBox::new(bundle),
@@ -687,7 +691,17 @@ impl Environment {
             yielder: std::ptr::null(),
             remaining_ticks: None,
             panic_cell: Rc::new(Cell::new(None)),
+            corruptor: crate::corrupt::Corruptor::new(corruption_options),
         };
+
+        if env.corruptor.is_enabled() {
+            log!(
+                "[corrupt] RTCV-style game corruption enabled: every {} frame(s), {} byte(s) per burst, seed {:#x}",
+                env.options.corruption.interval_frames.max(1),
+                env.options.corruption.bytes_per_burst.max(1),
+                env.options.corruption.seed
+            );
+        }
 
         if env.options.dumping_options.any() {
             env.dump_file =
@@ -819,6 +833,7 @@ impl Environment {
             yielder: std::ptr::null(),
             remaining_ticks: None,
             panic_cell: Rc::new(Cell::new(None)),
+            corruptor: crate::corrupt::Corruptor::default(),
         };
 
         env.set_up_initial_env_vars();
@@ -878,6 +893,7 @@ impl Environment {
             yielder: std::ptr::null(),
             remaining_ticks: None,
             panic_cell: Rc::new(Cell::new(None)),
+            corruptor: crate::corrupt::Corruptor::default(),
         }
     }
 
@@ -1647,6 +1663,12 @@ impl Environment {
                 .remaining_ticks
                 .is_none_or(|remaining_ticks| remaining_ticks > 0)
             {
+                if self.corruptor.is_enabled() {
+                    let mut corruptor = std::mem::take(&mut self.corruptor);
+                    corruptor.tick(&mut self.mem);
+                    self.corruptor = corruptor;
+                }
+
                 let state = self
                     .cpu
                     .run_or_step(&mut self.mem, self.remaining_ticks.as_mut());

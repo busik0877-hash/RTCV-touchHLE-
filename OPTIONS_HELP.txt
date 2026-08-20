@@ -296,3 +296,29 @@ Other options:
         stack and branch based on the stack's content. There is normally
         no reason to enable this option. The number of bytes must be
         chosen carefully on a per-app basis.
+    --corrupt-game
+        Enable the RTCV-style game corruption engine. This is ENABLED BY
+        DEFAULT. At a configurable cadence the emulator overwrites random
+        bytes of the running game's live memory with random values. Use
+        --no-corrupt-game to disable it.
+
+    --no-corrupt-game
+        Disable the game corruption engine (it is on by default).
+
+    --corrupt-interval=<frames>
+        How many main-loop iterations to wait between corruption bursts.
+        Lower is more aggressive. Default: 30. Implies --corrupt-game.
+
+    --corrupt-intensity=<count>
+        How many random bytes to corrupt per burst. Higher is more
+        destructive. Default: 1. Implies --corrupt-game.
+
+    --corrupt-seed=<number>
+        Seed for the corruption PRNG. A given seed reproduces the same
+        corruption stream. Default: a fixed built-in seed. Implies
+        --corrupt-game.
+
+    --corrupt-max-offset=<bytes>
+        Restrict corruption to the first <bytes> of each allocation. By
+        default the whole of each allocation is eligible. Implies
+        --corrupt-game.
