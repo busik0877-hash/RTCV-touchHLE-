@@ -81,7 +81,8 @@ impl Rng {
     }
 }
 
-/// Runtime state for the corruption engine. Lives on the [`crate::Environment`].
+/// Runtime state for the corruption engine. Lives on
+/// the [`crate::Environment`].
 pub struct Corruptor {
     options: CorruptionOptions,
     rng: Rng,

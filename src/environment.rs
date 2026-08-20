@@ -666,7 +666,7 @@ impl Environment {
             framework_state: Default::default(),
         };
 
-        let corruption_options = options.corruption.clone();
+        let corruption_options = options.corruption;
         let mut env = Environment {
             startup_time,
             bundle: NullableBox::new(bundle),
