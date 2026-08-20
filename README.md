@@ -1,1 +1,1 @@
-This modification was made for fun and is not connected in any way with the developers of touchHLE. I initially made it for HyperHLE and decided to make it for touchHLE, it will probably work more stably there.
+This modification was made for fun and is not connected in any way with the developers of touchHLE. I initially made it for HyperHLE and decided to make it for touchHLE, it will probably work more stably there
